@@ -1,48 +1,24 @@
-import { Component } from "react";
+import { memo, useEffect } from "react";
 
-export class Modal extends Component {
-  state = { isOpen: false };
+export const Modal = memo(({ image, onClose }) => {
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+    };
 
-  componentDidMount() {
-    window.addEventListener("keydown", this.escapeCloseModal);
-  }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
 
-  componentWillUnmount() {
-    window.removeEventListener("keydown", this.escapeCloseModal);
-  }
-
-  openModal = () => {
-    this.setState({
-        isOpen: true,
-    })
-  }
-
-  closeModal = () => {
-    this.setState({ isOpen: false });
-    console.log("Modal is cloded");
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) onClose();
   };
 
-  escapeCloseModal = (event) => {
-    if (event.key === "Escape") this.closeModal();
-  };
-
-  handleOverlayClick = (event) => {
-    if (event.target.className === "overlay") this.closeModal();
-  };
-
-  render() {
-    const { isOpen } = this.state;
-    const { largeImageURL, tags } = this.props.image;
-
-    if (!isOpen) return null;
-
-    return (
-      <div className="overlay" onClick={this.handleOverlayClick}>
-        <div className="modal">
-          <button type="button" onClick={this.closeModal}>Close</button>
-          <img src={largeImageURL} alt={tags} />
-        </div>
+  return (
+    <div className="overlay" onClick={handleOverlayClick}>
+      <div className="modal">
+        <img src={image.largeImageURL} alt={image.tags} />
       </div>
-    );
-  }
-}
+    </div>
+  );
+});
